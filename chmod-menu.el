@@ -31,11 +31,11 @@
 
 
 (require 'transient)
+(defvar chmod-menu-file nil)
 
 (defun chmod-menu-transient-init-val ()
   "Print permissions for FILE."
-  (let* ((perm (chmod-menu-print-file-permission (or buffer-file-name
-                                                     default-directory)))
+  (let* ((perm (format "%o" (file-modes chmod-menu-file)))
          (nums (mapcar #'string-to-number (split-string perm "" t)))
          (permissions-short '(""
                               "x"
@@ -99,50 +99,41 @@
      (concat
       "Permissions of "
       (abbreviate-file-name
-       (or buffer-file-name
-           default-directory))
+       chmod-menu-file)
       ": "
-      (string-trim
-       (shell-command-to-string
-        (concat "stat -c '%a' "
-                (shell-quote-argument
-                 (expand-file-name (or buffer-file-name
-                                       default-directory))))))))
+      (format "%o" (file-modes chmod-menu-file))))
    ("o" "Owner" chmod-menu--arg-owner)
    ("g" "Group" chmod-menu--arg-group)
    ("s" "Others" chmod-menu--others)]
-  [("RET" "Show" (lambda ()
-                   (interactive)
-                   (let* ((args (transient-args transient-current-command))
-                          (owner (transient-arg-value "--owner=" args))
-                          (group (transient-arg-value "--group=" args))
-                          (others (transient-arg-value "--others=" args))
-                          (formatted-args
-                           (string-join (mapcar
-                                         (apply-partially #'format "%s")
-                                         args)
-                                        "\n"))
-                          (val (string-join (list (chmod-menu-transient-to-octal
-                                                   owner)
-                                                  (chmod-menu-transient-to-octal
-                                                   group)
-                                                  (chmod-menu-transient-to-octal
-                                                   others))
-                                            "")))
-                     (shell-command-to-string
-                      (read-string " Run" (string-join
-                                           `("chmod" ,val
-                                             ,(or buffer-file-name
-                                                  default-directory))
-                                           "\s")))
-                     (revert-buffer))))])
+  [("RET" "Change mode" (lambda ()
+                          (interactive)
+                          (let* ((args
+                                  (transient-args transient-current-command))
+                                 (owner (transient-arg-value "--owner=" args))
+                                 (group (transient-arg-value "--group=" args))
+                                 (others (transient-arg-value "--others=" args))
+                                 (val (string-join
+                                       (list (chmod-menu-transient-to-octal
+                                              owner)
+                                             (chmod-menu-transient-to-octal
+                                              group)
+                                             (chmod-menu-transient-to-octal
+                                              others))
+                                       "")))
+                            (when (yes-or-no-p (format
+                                                "Change file permission to %s on %s?"
+                                                val chmod-menu-file))
+                              (set-file-modes
+                               chmod-menu-file
+                               (string-to-number val 8)
+                               'nofollow)))))]
+  (interactive)
+  (setq chmod-menu-file
+        (read-file-name "File"
+                        (when buffer-file-name
+                          (file-name-nondirectory buffer-file-name))))
+  (transient-setup 'chmod-menu))
 
-(defun chmod-menu-print-file-permission (file)
-  "Print permissions for FILE."
-  (string-trim
-   (shell-command-to-string (concat "stat -c '%a' "
-                                    (shell-quote-argument
-                                     (expand-file-name file))))))
 
 (provide 'chmod-menu)
 ;;; chmod-menu.el ends here

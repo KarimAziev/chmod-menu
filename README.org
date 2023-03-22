@@ -5,8 +5,6 @@ Simple transient menu for chmod.
 ** Installation
 
 - Emacs >= 28.1 is required.
-- chmod
-- stat
 
 *** Manual
 
