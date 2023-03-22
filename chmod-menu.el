@@ -129,11 +129,10 @@
                                'nofollow)))))]
   (interactive)
   (setq chmod-menu-file
-        (read-file-name "File"
+        (read-file-name "File: "
                         (when buffer-file-name
                           (file-name-nondirectory buffer-file-name))))
   (transient-setup 'chmod-menu))
-
 
 (provide 'chmod-menu)
 ;;; chmod-menu.el ends here
