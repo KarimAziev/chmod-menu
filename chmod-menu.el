@@ -91,7 +91,7 @@
   :choices '("x" "w" "xw" "r" "rx" "rw" "rwx"))
 
 
-;;;###autoload (autoload 'chmod-menu nil nil t)
+;;;###autoload (autoload 'chmod-menu "chmod-menu.el" nil t)
 (transient-define-prefix chmod-menu ()
   "Permissions."
   [:description
