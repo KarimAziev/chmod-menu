@@ -1,0 +1,37 @@
+* chmod-menu
+
+Simple transient menu for chmod.
+
+** Installation
+
+- Emacs >= 28.1 is required.
+- chmod
+- stat
+
+*** Manual
+
+Download the source code and put it wherever you like, e.g. into =~/.emacs.d/chmod-menu/=
+
+#+begin_src shell :eval no
+git clone https://github.com/KarimAziev/chmod-menu.git ~/.emacs.d/chmod-menu/
+#+end_src
+
+Add the downloaded directory to the load path:
+
+#+begin_src elisp :eval no
+(add-to-list 'load-path "~/.emacs.d/chmod-menu/")
+(require 'chmod-menu)
+#+end_src
+
+#+begin_src elisp :eval no
+(use-package chmod-menu
+  :straight (chmod-menu
+             :repo "KarimAziev/chmod-menu"
+             :type git
+             :host github))
+#+end_src
+
+** Transient
+
+*** ~chmod-menu~
+Change permission for current file or directory with =chmod=.

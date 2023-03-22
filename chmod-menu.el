@@ -93,7 +93,7 @@
 
 ;;;###autoload (autoload 'chmod-menu "chmod-menu.el" nil t)
 (transient-define-prefix chmod-menu ()
-  "Permissions."
+  "Change permission for current file or directory with `chmod'."
   [:description
    (lambda ()
      (concat
