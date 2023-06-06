@@ -90,11 +90,33 @@
   :argument-regexp "\\(?:r\\(?:wx\\|[wx]\\)\\|xw\\|[rwx]\\)"
   :choices '("x" "w" "xw" "r" "rx" "rw" "rwx"))
 
+(defun chmod-menu-change-mode-suffix (args)
+	"Set file mode according to ARGS."
+	(interactive (list (transient-args transient-current-command)))
+	(let* ((owner (transient-arg-value "--owner=" args))
+         (group (transient-arg-value "--group=" args))
+         (others (transient-arg-value "--others=" args))
+         (val (string-join
+               (list (chmod-menu-transient-to-octal
+                      owner)
+                     (chmod-menu-transient-to-octal
+                      group)
+                     (chmod-menu-transient-to-octal
+                      others))
+               "")))
+    (when (yes-or-no-p (format
+                        "Change file permission to %s on %s?"
+                        val chmod-menu-file))
+      (set-file-modes
+       chmod-menu-file
+			 (string-to-number val 8)
+       'nofollow))))
+
 
 ;;;###autoload (autoload 'chmod-menu "chmod-menu.el" nil t)
-(transient-define-prefix chmod-menu ()
-  "Change permission for current file or directory with `chmod'."
-  [:description
+(transient-define-prefix chmod-menu (&optional file)
+	"Change permission for current file or directory with `chmod'."
+	[:description
    (lambda ()
      (concat
       "Permissions of "
@@ -105,33 +127,13 @@
    ("o" "Owner" chmod-menu--arg-owner)
    ("g" "Group" chmod-menu--arg-group)
    ("s" "Others" chmod-menu--others)]
-  [("RET" "Change mode" (lambda ()
-                          (interactive)
-                          (let* ((args
-                                  (transient-args transient-current-command))
-                                 (owner (transient-arg-value "--owner=" args))
-                                 (group (transient-arg-value "--group=" args))
-                                 (others (transient-arg-value "--others=" args))
-                                 (val (string-join
-                                       (list (chmod-menu-transient-to-octal
-                                              owner)
-                                             (chmod-menu-transient-to-octal
-                                              group)
-                                             (chmod-menu-transient-to-octal
-                                              others))
-                                       "")))
-                            (when (yes-or-no-p (format
-                                                "Change file permission to %s on %s?"
-                                                val chmod-menu-file))
-                              (set-file-modes
-                               chmod-menu-file
-                               (string-to-number val 8)
-                               'nofollow)))))]
+  [("RET" "Change mode" chmod-menu-change-mode-suffix)]
   (interactive)
   (setq chmod-menu-file
-        (read-file-name "File: "
-                        (when buffer-file-name
-                          (file-name-nondirectory buffer-file-name))))
+				(or file
+						(read-file-name "File: "
+														(when buffer-file-name
+															(file-name-nondirectory buffer-file-name)))))
   (transient-setup 'chmod-menu))
 
 (provide 'chmod-menu)
