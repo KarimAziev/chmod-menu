@@ -91,9 +91,9 @@
   :choices '("x" "w" "xw" "r" "rx" "rw" "rwx"))
 
 (defun chmod-menu-change-mode-suffix (args)
-	"Set file mode according to ARGS."
-	(interactive (list (transient-args transient-current-command)))
-	(let* ((owner (transient-arg-value "--owner=" args))
+  "Set file mode according to ARGS."
+  (interactive (list (transient-args transient-current-command)))
+  (let* ((owner (transient-arg-value "--owner=" args))
          (group (transient-arg-value "--group=" args))
          (others (transient-arg-value "--others=" args))
          (val (string-join
@@ -109,14 +109,14 @@
                         val chmod-menu-file))
       (set-file-modes
        chmod-menu-file
-			 (string-to-number val 8)
+       (string-to-number val 8)
        'nofollow))))
 
 
 ;;;###autoload (autoload 'chmod-menu "chmod-menu.el" nil t)
 (transient-define-prefix chmod-menu (&optional file)
-	"Change permission for current file or directory with `chmod'."
-	[:description
+  "Change permission for current file or directory with `chmod'."
+  [:description
    (lambda ()
      (concat
       "Permissions of "
@@ -130,10 +130,10 @@
   [("RET" "Change mode" chmod-menu-change-mode-suffix)]
   (interactive)
   (setq chmod-menu-file
-				(or file
-						(read-file-name "File: "
-														(when buffer-file-name
-															(file-name-nondirectory buffer-file-name)))))
+        (or file
+            (read-file-name "File: "
+                            (when buffer-file-name
+                              (file-name-nondirectory buffer-file-name)))))
   (transient-setup 'chmod-menu))
 
 (provide 'chmod-menu)
